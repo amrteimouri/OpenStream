@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.png" alt="OpenStream" width="260"></p>
+
 # OpenStream
 
 **An IPTV player for Android TV that anyone can use — including people who have never touched a setting in their life.**

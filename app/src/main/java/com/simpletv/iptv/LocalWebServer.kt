@@ -150,7 +150,7 @@ class LocalWebServer(
                 ".err{color:#f87171;font-size:20px}small{color:#94a3b8}"
 
         private const val HEAD = "<!doctype html><html lang=\"fa\" dir=\"rtl\"><head><meta charset=\"utf-8\">" +
-            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>تلویزیون ساده</title>" +
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>OpenStream</title>" +
             "<style>$STYLE</style></head><body>"
 
         private const val PAGE = HEAD +

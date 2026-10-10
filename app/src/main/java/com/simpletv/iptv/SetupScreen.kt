@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,12 +41,15 @@ fun SetupScreen(vm: AppViewModel) {
         horizontalArrangement = Arrangement.spacedBy(48.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(
-                if (sources.isEmpty()) "به تلویزیون ساده خوش آمدید" else "افزودن لیست یا جستجو با گوشی",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Image(painterResource(R.drawable.logo), contentDescription = "OpenStream", modifier = Modifier.size(64.dp))
+                Text(
+                    if (sources.isEmpty()) "به OpenStream خوش آمدید" else "افزودن لیست یا جستجو با گوشی",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+            }
             Step("۱", "گوشی خود را به همین اینترنت خانه وصل کنید.")
             Step("۲", "دوربین گوشی را روی کد روبه‌رو بگیرید.")
             Step("۳", "لینک لیست را بفرستید، یا اسم شبکه را برای جستجو بنویسید.")

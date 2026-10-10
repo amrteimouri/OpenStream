@@ -1,5 +1,7 @@
 <div dir="rtl">
 
+<p align="center"><img src="assets/logo.png" alt="OpenStream" width="260"></p>
+
 # OpenStream
 
 **پخش‌کننده‌ی IPTV برای تلویزیون اندروید، به‌قدری ساده که حتی کسی که هیچ‌وقت سراغ تنظیمات نرفته هم بتواند ازش استفاده کند.**
