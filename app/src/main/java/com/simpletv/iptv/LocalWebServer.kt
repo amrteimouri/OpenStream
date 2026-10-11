@@ -27,6 +27,10 @@ class LocalWebServer(
 
     private var server: ServerSocket? = null
 
+    /**
+     * سرور را روی پورت [port] شروع می‌کند. هر اتصال در یک coroutine جدا پردازش می‌شود.
+     * اگر پورت مشغول باشد یا سرور بسته شود، بی‌صدا تمام می‌شود.
+     */
     fun start(scope: CoroutineScope) {
         scope.launch(Dispatchers.IO) {
             try {
@@ -42,10 +46,18 @@ class LocalWebServer(
         }
     }
 
+    /** سرور را می‌بندد (هنگام بسته شدن اپ). */
     fun stop() {
         runCatching { server?.close() }
     }
 
+    /**
+     * یک درخواست HTTP را می‌خواند و جواب می‌دهد.
+     *
+     * پروتکل عمداً ساده است: GET همیشه صفحه‌ی اصلی را می‌دهد و POST فرم را پردازش می‌کند.
+     * یک POST می‌تواند جستجو (`q`)، لینک/متن لیست (`url`، `text`) یا اطلاعات Xtream
+     * (`xserver`، `xuser`، `xpass`) باشد.
+     */
     private suspend fun handle(socket: Socket) {
         socket.use { sock ->
             sock.soTimeout = 30_000
@@ -111,6 +123,7 @@ class LocalWebServer(
         }
     }
 
+    /** یک صفحه‌ی HTML با کد ۲۰۰ و هدرهای لازم می‌فرستد. */
     private fun respond(out: OutputStream, html: String) {
         val bytes = html.toByteArray(Charsets.UTF_8)
         val head = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n" +
@@ -120,6 +133,8 @@ class LocalWebServer(
         out.flush()
     }
 
+    /** یک خط (تا `
+`) را بایت‌به‌بایت می‌خواند؛ `` حذف می‌شود. اگر جریان تمام شده باشد null برمی‌گرداند. */
     private fun readLine(input: InputStream): String? {
         val sb = ByteArrayOutputStream()
         while (true) {
@@ -132,8 +147,13 @@ class LocalWebServer(
     }
 
     companion object {
+        /** سقف حجم فرم؛ ۳۰ مگابایت برای چسباندن متن یک لیست بزرگ کافی است. */
         const val MAX_BODY = 30 * 1024 * 1024
 
+        /**
+         * آدرس IP تلویزیون در شبکه‌ی خانه (مثلاً `192.168.1.20`) یا null اگر به شبکه وصل نیست.
+         * فقط آدرس‌های خصوصی IPv4 (`192.168.x.x`، `10.x.x.x`، …) حساب می‌شوند.
+         */
         fun localIp(): String? = runCatching {
             NetworkInterface.getNetworkInterfaces().toList()
                 .flatMap { it.inetAddresses.toList() }
@@ -141,6 +161,7 @@ class LocalWebServer(
                 ?.hostAddress
         }.getOrNull()
 
+        /** استایل مشترک صفحه‌ها: تیره، راست‌به‌چپ و با دکمه‌ها و کادرهای بزرگ برای لمس با انگشت. */
         private const val STYLE =
             "body{font-family:sans-serif;margin:0;padding:20px;background:#0f172a;color:#fff;direction:rtl;text-align:right}" +
                 "h1{font-size:22px}label{display:block;margin:18px 0 6px;font-size:16px}" +
@@ -149,10 +170,12 @@ class LocalWebServer(
                 "border-radius:8px;background:#2563eb;color:#fff}.ok{color:#4ade80;font-size:20px}" +
                 ".err{color:#f87171;font-size:20px}small{color:#94a3b8}"
 
+        /** ابتدای هر صفحه‌ی HTML (تا بازشدن `<body>`). */
         private const val HEAD = "<!doctype html><html lang=\"fa\" dir=\"rtl\"><head><meta charset=\"utf-8\">" +
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>OpenStream</title>" +
             "<style>$STYLE</style></head><body>"
 
+        /** صفحه‌ی اصلی: کادر جستجو، فرم لینک/متن لیست و فرم ورود Xtream. */
         private const val PAGE = HEAD +
             "<h1>جستجوی شبکه</h1>" +
             "<form method=\"post\" action=\"/\">" +
@@ -174,6 +197,7 @@ class LocalWebServer(
             "<button type=\"submit\">ورود و دریافت شبکه‌ها</button></form>" +
             "<p><small>این صفحه فقط روی اینترنت خانه‌ی شما کار می‌کند.</small></p></body></html>"
 
+        /** صفحه‌ی نتیجه بعد از ارسال فرم؛ [ok] رنگ سبز یا قرمز پیام را تعیین می‌کند. */
         private fun resultPage(ok: Boolean, message: String): String =
             HEAD + "<p class=\"${if (ok) "ok" else "err"}\">${if (ok) "✅" else "❌"} " +
                 message.replace("<", "&lt;") +

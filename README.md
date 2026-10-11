@@ -94,6 +94,11 @@ Accept the "Allow debugging?" prompt on the TV.
 3. Paste your playlist link (or Xtream details) and press send. Channels appear on the TV.
 4. Press **OK** at any time to browse, search and manage playlists (*Add playlist* in the sidebar).
 
+## More documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the app is structured and why (state, storage, health checks, remote-control focus handling).
+- Every class and function carries a KDoc comment (in Persian).
+
 ## Legal
 
 OpenStream is a media player. It does not provide, host, index or recommend any channel or stream, and you are responsible for having the right to watch whatever you add. The "send to TV" page is served only on your local network and is never exposed to the internet.

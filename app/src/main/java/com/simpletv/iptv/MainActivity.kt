@@ -19,6 +19,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.darkColorScheme
 
+/**
+ * تنها Activity اپ؛ فقط ViewModel را می‌سازد و محتوای Compose را نشان می‌دهد.
+ * تنظیم `configChanges` در AndroidManifest باعث می‌شود با تغییر ورودی (مثل وصل شدن کیبورد)
+ * Activity دوباره ساخته نشود و پخش قطع نشود.
+ */
 class MainActivity : ComponentActivity() {
     private val vm: AppViewModel by viewModels()
 
@@ -32,6 +37,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * ریشه‌ی رابط کاربری: چیدمان را راست‌به‌چپ می‌کند و بین صفحه‌ی افزودن لیست ([SetupScreen])
+ * و پلیر ([PlayerScreen]) یکی را نشان می‌دهد.
+ *
+ * صفحه‌ی افزودن لیست وقتی دیده می‌شود که هنوز لیستی نداریم یا کاربر خودش آن را باز کرده باشد.
+ */
 @Composable
 fun AppRoot(vm: AppViewModel) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {

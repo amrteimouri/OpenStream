@@ -4,9 +4,11 @@ import androidx.compose.ui.graphics.Color
 
 /** رنگ‌های اپ: تیره و با کنتراست بالا تا از دور روی تلویزیون خوانا باشد. */
 object Palette {
+    // رنگ‌های پایه
     val Bg = Color(0xFF0B1220)
     val Card = Color(0xFF162036)
     val Primary = Color(0xFF3B82F6)
+    // رنگ متن وضعیت (روی پس‌زمینه‌ی تیره)
     val Ok = Color(0xFF4ADE80)
     val Fail = Color(0xFFF87171)
     val Warn = Color(0xFFFBBF24)

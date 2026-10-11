@@ -97,6 +97,7 @@ fun SetupScreen(vm: AppViewModel) {
     }
 }
 
+/** یک قدم از راهنمای سه‌مرحله‌ای: شماره‌ی آبی بزرگ و یک جمله‌ی کوتاه. */
 @Composable
 private fun Step(number: String, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {

@@ -61,6 +61,17 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
+/**
+ * صفحه‌ی اصلی اپ: ویدیوی تمام‌صفحه به‌همراه کنترل با ریموت.
+ *
+ * دکمه‌ها (وقتی منوی شبکه‌ها بسته است):
+ * - بالا / پایین (و CH+/CH-): شبکه‌ی بعدی / قبلی
+ * - OK، چپ، راست و منو: باز کردن لیست شبکه‌ها
+ * - ۰ تا ۹: شماره‌ی شبکه؛ بعد از ۱٫۸ ثانیه بدون دکمه‌ی دیگر، به آن شبکه می‌رود
+ *
+ * نکته: OK هنگام «رها شدن» دکمه پردازش می‌شود، نه هنگام فشردن؛ وگرنه رها کردن دکمه روی
+ * منوی تازه‌باز‌شده به‌عنوان کلیک روی اولین شبکه حساب می‌شد و منو بلافاصله بسته می‌شد.
+ */
 @Composable
 fun PlayerScreen(vm: AppViewModel) {
     val channels by vm.channels.collectAsState()
@@ -168,6 +179,7 @@ fun PlayerScreen(vm: AppViewModel) {
     }
 }
 
+/** نوار پایین ویدیو که چند ثانیه بعد از عوض شدن شبکه دیده می‌شود: شماره، لوگو، اسم، دسته و راهنمای دکمه‌ها. */
 @Composable
 private fun InfoBar(number: Int, channel: Channel) {
     Column(
@@ -220,6 +232,18 @@ fun Logo(channel: Channel, size: Int) {
     }
 }
 
+/**
+ * پلیر ویدیو (ExoPlayer) برای آدرس [url].
+ *
+ * رفتار در برابر خطا:
+ * - لینک بدون پسوند `.m3u8` که پلیر نشناخت: یک‌بار به‌عنوان HLS امتحان می‌شود
+ * - خطای دائمی (۴۰۱/۴۰۳/۴۰۴ یا فرمت ناسازگار): فوراً با دلیل ساده اعلام می‌شود
+ * - خطای موقت: تا [MAX_RETRIES] بار، هر ۳ ثانیه دوباره امتحان می‌شود
+ * - اگر [STALL_MS] بدون شروع پخش و بدون خطا بگذرد: شبکه «جواب نمی‌دهد» حساب می‌شود
+ *
+ * @param onMessage پیام وضعیت برای نشان دادن روی ویدیو؛ null یعنی پخش جریان دارد
+ * @param onResult نتیجه‌ی واقعی پخش (true = پخش شد)؛ وضعیت سلامت شبکه را با آن اصلاح می‌کنیم
+ */
 @OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 private fun VideoSurface(url: String, onMessage: (String?) -> Unit, onResult: (Boolean) -> Unit) {
@@ -354,6 +378,11 @@ private fun fatalReason(e: PlaybackException): String? {
     }
 }
 
+/** تعداد تلاش دوباره برای خطاهای موقت پخش. */
 private const val MAX_RETRIES = 5
+
+/** اگر این‌قدر (میلی‌ثانیه) بدون شروع پخش بگذرد، شبکه خراب حساب می‌شود. */
 private const val STALL_MS = 20_000L
+
+/** جمله‌ی پایانی همه‌ی پیام‌های خطا. */
 private const val CHOOSE_ANOTHER = "با دکمه‌ی بالا یا پایین شبکه‌ی دیگری را انتخاب کنید."

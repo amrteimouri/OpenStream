@@ -54,7 +54,10 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
 
+/** اسم دسته‌ی علاقه‌مندی‌ها؛ فقط وقتی دست‌کم یک علاقه‌مندی هست در نوار کناری می‌آید. */
 private const val FAVORITES = "⭐ علاقه‌مندی‌ها"
+
+/** اسم دسته‌ی جستجو؛ همیشه اولین مورد نوار کناری است و محتوایش نتیجه‌ی عبارت جستجو است. */
 private const val SEARCH = "🔍 جستجو"
 
 /** هر صفحه ۸ شبکه دارد تا روی صفحه‌ی تلویزیون همه‌ی ردیف‌ها بدون اسکرول و خوانا جا شوند. */
@@ -75,7 +78,8 @@ fun ChannelBrowser(vm: AppViewModel, onClose: () -> Unit) {
     val health by vm.health.collectAsState()
     val query by vm.searchQuery.collectAsState()
 
-    // نتیجه‌ی جستجو با هر بار تایپ دوباره حساب می‌شود (روی لیست‌های بزرگ هم سریع است)
+    // نتیجه‌ی جستجو با هر بار تایپ دوباره حساب می‌شود (روی لیست‌های بزرگ هم سریع است).
+    // دسته‌ی علاقه‌مندی‌ها هم همین‌جا ساخته می‌شود، چون به علاقه‌مندی‌های لحظه‌ای بستگی دارد.
     val searchResults = remember(channels, query) { searchChannels(channels, query) }
     val groups = remember(baseGroups, channels, favorites, searchResults) {
         val fav = IntArray(channels.size)
@@ -110,7 +114,10 @@ fun ChannelBrowser(vm: AppViewModel, onClose: () -> Unit) {
         if (recheckTick > 0) vm.checkChannels(pageIds.map { channels[it].url }, force = true)
     }
 
-    // مدیریت فوکوس
+    // مدیریت فوکوس: هر ردیف یک FocusRequester ثابت دارد (بر اساس جایش در صفحه، نه شماره‌ی شبکه)
+    // تا بعد از عوض شدن صفحه بشود فوکوس را به اولین یا آخرین ردیف داد.
+    // pendingFocus: بعد از رفتن به صفحه‌ی دیگر، فوکوس باید روی کدام ردیف بنشیند (-1 = آخرین ردیف).
+    // focusedPos / listHasFocus: برای فهمیدن این‌که دکمه‌ی پایین روی آخرین ردیف زده شده یا نه.
     val rowFocus = remember { List(PAGE_SIZE) { FocusRequester() } }
     var pendingFocus by remember { mutableStateOf<Int?>(null) } // -1 یعنی آخرین ردیف
     var focusedPos by remember { mutableIntStateOf(0) }
@@ -183,6 +190,8 @@ fun ChannelBrowser(vm: AppViewModel, onClose: () -> Unit) {
                     .weight(1f)
                     .fillMaxWidth()
                     .onFocusChanged { listHasFocus = it.hasFocus }
+                    // «پیش‌نمایش» کلید یعنی قبل از این‌که ردیف‌ها خودشان فوکوس را جابه‌جا کنند، ما می‌بینیم.
+                    // پایین روی آخرین ردیف = صفحه‌ی بعد؛ بالا روی اولین ردیف = صفحه‌ی قبل.
                     .onPreviewKeyEvent { ev ->
                         if (ev.type != KeyEventType.KeyDown || !listHasFocus) return@onPreviewKeyEvent false
                         when (ev.key.nativeKeyCode) {
@@ -247,6 +256,7 @@ fun ChannelBrowser(vm: AppViewModel, onClose: () -> Unit) {
     }
 }
 
+/** یک خلاصه‌ی کوچک بالای لیست: نقطه‌ی رنگی و متن (مثلاً «● سالم ۵»). */
 @Composable
 private fun Summary(text: String, dot: Color) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 16.dp)) {
@@ -255,6 +265,12 @@ private fun Summary(text: String, dot: Color) {
     }
 }
 
+/**
+ * یک مورد نوار کناری (دسته یا دکمه).
+ *
+ * @param count تعداد شبکه‌های دسته؛ برای دکمه‌ها null است
+ * @param onFocused با رسیدن فوکوس صدا زده می‌شود؛ دسته‌ها با همین به‌جای نیاز به OK عوض می‌شوند
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun SideItem(
@@ -286,6 +302,11 @@ private fun SideItem(
     }
 }
 
+/**
+ * یک ردیف شبکه: شماره، لوگو، اسم، نشانه‌ی علاقه‌مندی/در حال پخش و وضعیت سلامت.
+ *
+ * کلیک = پخش؛ نگه داشتن OK = علاقه‌مندی. شبکه‌ی خراب کمرنگ‌تر دیده می‌شود ولی هنوز قابل انتخاب است.
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun ChannelRow(
@@ -339,6 +360,7 @@ private fun ChannelRow(
     }
 }
 
+/** نقطه‌ی رنگی و برچسب وضعیت کنار هر شبکه؛ برچسب متنی هم دارد تا فقط به رنگ تکیه نشود. */
 @Composable
 private fun StatusDot(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {

@@ -16,6 +16,15 @@ class XtreamLogin(val server: String, val user: String, val pass: String)
  * تا بقیه‌ی اپ دقیقاً مثل لیست‌های معمولی با آن کار کند.
  */
 object XtreamClient {
+    /**
+     * با اطلاعات [login] وارد سرور می‌شود و شبکه‌های زنده را در فایل M3U [target] می‌نویسد.
+     *
+     * مراحل: ۱) اعتبارسنجی نام کاربری با `player_api.php`، ۲) خواندن دسته‌ها، ۳) خواندن شبکه‌ها،
+     * ۴) نوشتن خط‌های `#EXTINF` و آدرس `/live/<user>/<pass>/<id>.<ext>`.
+     *
+     * @throws IllegalStateException با پیام فارسی ساده اگر آدرس یا رمز غلط باشد، اشتراک فعال نباشد
+     *   یا سرور از نوع Xtream نباشد
+     */
     fun writePlaylist(login: XtreamLogin, target: File) {
         val base = normalize(login.server)
         val query = "username=${enc(login.user)}&password=${enc(login.pass)}"
@@ -77,6 +86,7 @@ object XtreamClient {
         return "${url.protocol}://${url.host}$port"
     }
 
+    /** متن جواب یک آدرس را می‌گیرد (برای JSON های API)؛ با کد غیر ۲xx خطا می‌دهد. */
     private fun fetch(address: String): String {
         val conn = URL(address).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000

@@ -7,6 +7,13 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 
+/**
+ * از یک متن (اینجا آدرس صفحه‌ی افزودن لیست) کد QR می‌سازد.
+ *
+ * @param text متنی که باید در QR باشد
+ * @param size اندازه‌ی ضلع تصویر بر حسب پیکسل
+ * @return تصویر سیاه و سفید با حاشیه‌ی کوچک؛ برای اسکن شدن از دور، بزرگ و پرکنتراست است
+ */
 fun qrBitmap(text: String, size: Int = 512): ImageBitmap {
     val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size, mapOf(EncodeHintType.MARGIN to 2))
     val pixels = IntArray(size * size) { i ->

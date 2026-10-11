@@ -9,9 +9,21 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 
-/** وضعیت سلامت یک شبکه. */
+/**
+ * وضعیت سلامت یک شبکه.
+ *
+ * - [UNKNOWN] هنوز بررسی نشده
+ * - [CHECKING] بررسی در جریان است
+ * - [OK] سرور جواب داد و ویدیو دریافت شد (یا پلیر واقعاً آن را پخش کرد)
+ * - [FAIL] جواب نداد، آدرس خراب است یا پلیر نتوانست پخش کند
+ */
 enum class Health { UNKNOWN, CHECKING, OK, FAIL }
 
+/**
+ * نتیجه‌ی آخرین بررسی یک شبکه.
+ *
+ * @property at زمان بررسی (میلی‌ثانیه)؛ نتیجه‌های قدیمی‌تر از ۱۰ دقیقه دوباره بررسی می‌شوند
+ */
 data class HealthEntry(val status: Health, val at: Long)
 
 /**
@@ -34,6 +46,13 @@ object StreamProbe {
         }
     }
 
+    /**
+     * زنجیره‌ی HLS را دنبال می‌کند: لیست اصلی ← لیست کیفیت ← اولین تکه‌ی ویدیو.
+     *
+     * @param depth عمق فعلی زنجیره؛ از [MAX_DEPTH] بیشتر نمی‌شود تا لیست‌های حلقه‌ای گیر نکنند
+     * @param current آخرین اتصال باز، تا در صورت لغو شدن کار از بیرون بسته شود
+     * @return true اگر شبکه به‌نظر سالم است
+     */
     private fun probe(url: String, depth: Int, current: AtomicReference<HttpURLConnection?>): Boolean {
         if (depth > MAX_DEPTH) return true
         val conn = open(url, current) ?: return false
@@ -85,6 +104,7 @@ object StreamProbe {
         return null
     }
 
+    /** حداکثر [limit] بایت از ابتدای جریان را می‌خواند (برای بررسی سرآغاز فایل، نه دانلود کامل). */
     private fun readUpTo(input: InputStream, limit: Int): ByteArray {
         val buf = ByteArray(limit)
         var total = 0
