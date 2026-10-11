@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// اطلاعات کلید امضای release از keystore.properties خوانده می‌شود (این فایل داخل گیت نیست).
+// اگر فایل نبود (مثلاً کسی پروژه را کلون کرده)، build با کلید debug امضا می‌شود تا باز هم کار کند.
+val keystoreProps = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
@@ -13,7 +22,18 @@ android {
         minSdk = 23
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1"
+        versionName = "0.1.0"
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystoreProps.isNotEmpty()) {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -22,7 +42,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (keystoreProps.isNotEmpty()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {

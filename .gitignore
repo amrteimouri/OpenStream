@@ -6,3 +6,7 @@ local.properties
 graphify-out/
 playlists/
 *.apk
+keystore.properties
+*.jks
+*.keystore
+release/

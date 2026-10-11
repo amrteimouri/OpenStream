@@ -10,6 +10,17 @@ OpenStream is a bare player: it ships with **no channels, no playlists and no li
 
 The whole interface is Persian (right-to-left) and designed for a 10-foot screen with a plain remote — no mouse, no tiny buttons, no technical jargon.
 
+## Download
+
+Get the latest APK from the [Releases page](https://github.com/amrteimouri/OpenStream/releases/latest) (`OpenStream-vX.Y.Z.apk`, about 3 MB). It runs on any Android TV or Android box with Android 6.0 or newer.
+
+**Install on a TV**
+
+- *Easiest:* install the free **Downloader** app on the TV, open the APK link from the Releases page in it, and allow "install unknown apps" when asked.
+- *Or* copy the APK to a USB stick, or use `adb install` (see below).
+
+**Check the download (optional).** Each release lists a SHA-256 checksum and the signing-certificate fingerprint (`07672e0a…3688dc`). On Windows: `certutil -hashfile OpenStream-vX.Y.Z.apk SHA256`. Releases are always signed with the same key, so an update installs over the previous version and keeps your playlists.
+
 ## Features
 
 - **Add a playlist from your phone, no typing on the remote.** The TV shows a QR code. Scan it, paste the link on a simple web page, and the playlist appears on the TV.
@@ -73,7 +84,7 @@ Requirements: JDK 17+ (24 works), Android SDK (API 36), an Android TV running An
 ./gradlew assembleRelease
 ```
 
-The APK is written to `app/build/outputs/apk/`. The release build is signed with the debug key, so it installs directly for testing.
+The APK is written to `app/build/outputs/apk/`. If a `keystore.properties` file exists in the project root (it is git-ignored) the release build is signed with that key; otherwise it falls back to the debug key so anyone can still build and test. To sign your own builds, create a keystore with `keytool` and add `storeFile`, `storePassword`, `keyAlias` and `keyPassword` to `keystore.properties`.
 
 ### Install on a TV over Wi-Fi
 
